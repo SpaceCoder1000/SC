@@ -10,7 +10,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 # Serve the HTML file
 @app.route('/')
 def serve_html():
-    return send_from_directory(os.path.abspath('.'), 'main.html')
+    return send_from_directory(os.path.abspath('.'), 'index.html')
 
 # WebSocket message handling
 @socketio.on('message')
