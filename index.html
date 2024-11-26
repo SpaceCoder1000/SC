@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f2f2f2;
+        }
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px;
+        }
+        #passwordForm, #nameForm, #chatContent {
+            display: none;
+            text-align: center;
+        }
+        #chatContent {
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+        #chatBox {
+            border: 1px solid #ccc;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .chat-input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        @media (min-width: 400px) {
+            .chat-input-container {
+                flex-direction: row;
+            }
+            #messageInput {
+                flex: 3;
+                margin-right: 5px;
+            }
+            button {
+                flex: 1;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="passwordForm" class="form-container">
+        <h2>Enter Password</h2>
+        <input type="password" id="passwordInput" placeholder="Enter password">
+        <button onclick="checkPassword()">Submit</button>
+    </div>
+
+    <div id="nameForm" class="form-container">
+        <h2>Enter Your Name</h2>
+        <input type="text" id="nameInput" placeholder="Enter your name">
+        <button onclick="setName()">Set Name</button>
+    </div>
+
+    <div id="chatContent" class="form-container">
+        <h2>Chat Room</h2>
+        <div id="chatBox"></div>
+        <div class="chat-input-container">
+            <input type="text" id="messageInput" placeholder="Type your message">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.min.js"></script>
+    <script>
+        const correctPassword = "TMSSC6";
+        let socket;
+        let userName = '';
+
+        function checkPassword() {
+            const userInput = document.getElementById("passwordInput").value;
+            if (userInput === correctPassword) {
+                document.getElementById("passwordForm").style.display = "none";
+                document.getElementById("nameForm").style.display = "block";
+            } else {
+                alert("Incorrect password. Try again.");
+            }
+        }
+
+        function setName() {
+            const nameInput = document.getElementById("nameInput").value.trim();
+            if (nameInput) {
+                userName = nameInput;
+                document.getElementById("nameForm").style.display = "none";
+                document.getElementById("chatContent").style.display = "block";
+                setupSocket();
+            } else {
+                alert("Please enter a valid name.");
+            }
+        }
+
+        function setupSocket() {
+            socket = io.connect(window.location.origin);
+
+            socket.on('connect', function() {
+                console.log("WebSocket connected");
+            });
+
+            socket.on('message', function(message) {
+                const chatBox = document.getElementById("chatBox");
+                const newMessage = document.createElement("div");
+                newMessage.textContent = message;
+                chatBox.appendChild(newMessage);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const message = input.value.trim();
+            if (message) {
+                const formattedMessage = `${userName}: ${message}`;
+                socket.send(formattedMessage);
+                input.value = '';
+            }
+        }
+
+        // Show password form initially
+        document.getElementById("passwordForm").style.display = "block";
+    </script>
+</body>
+</html>
